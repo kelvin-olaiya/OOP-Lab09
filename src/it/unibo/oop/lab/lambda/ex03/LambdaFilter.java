@@ -14,6 +14,8 @@ import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
+import java.util.*;
+import static java.util.stream.Collectors.*;
 
 /**
  * Modify this small program adding new filters.
@@ -35,7 +37,22 @@ public final class LambdaFilter extends JFrame {
     private static final long serialVersionUID = 1760990730218643730L;
 
     private enum Command {
-        IDENTITY("No modifications", Function.identity());
+        IDENTITY("No modifications", Function.identity()),
+        TOLOWER("To lowercase", String::toLowerCase),
+        CHCOUNT("Number of chars", e -> String.valueOf(e.chars().count())),
+        LINECOUNT("Number of lines", e -> String.valueOf(e.lines().count())),
+        ALFABETA("Alfabetical order", e -> Arrays.stream(e.split(" "))
+                                                 .distinct()
+                                                 .sorted()
+                                                 .reduce((a, b) -> a + " " + b)
+                                                 .orElse("")),
+        WORDCOUNT("Count words", e -> Arrays.stream(e.split(" "))
+                                            .collect(groupingBy(Function.identity(), counting()))
+                                            .entrySet()
+                                            .stream()
+                                            .map(v -> v.getKey() + " -> " + v.getValue())
+                                            .reduce((a, b) -> a + " " + b)
+                                            .orElse(""));
 
         private final String commandName;
         private final Function<String, String> fun;
